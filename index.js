@@ -4,25 +4,6 @@ const path = require('path');
 const PORT = 3000;
 var bodyParser=require("body-parser");
 
-const mongoose = require("mongoose");
-  
-app.set("view engine", "ejs");
-app.use(bodyParser.urlencoded({ extended: true }));
-
-mongoose.connect(
-    process.env.MONGODB_URI, 
-    {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    }
-);
-
-const registerSchema = new mongoose.Schema({
-    email: String,
-    password: String
-});
-
-const register = mongoose.model('Student', registerSchema);
 
 app.use(bodyParser.json());
 app.use(express.static('public'));
@@ -30,8 +11,35 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://127.0.0.1:27017/register').then((ans) => {
+    console.log("ConnectedSuccessful")
+}).catch((err) => {
+    console.log("Error in the Connection")
+});
+
+// module.exports = conn;
+
+const Schema = mongoose.Schema;
+  
+// Creating Structure of the collection
+const collection_structure = new Schema({
+    email: {
+        type: String,
+    },
+    password: {
+        type: String,
+    }
+})
+  
+// Creating collection
+const collections = mongoose.model(
+        "data", collection_structure)
+  
 // Without middleware
 app.get('/', function (req, res) {
+	console.log('/GET /')
 	const options = {
 		root: path.join(__dirname)
 	};
@@ -45,6 +53,7 @@ app.get('/', function (req, res) {
 	});
 });
 app.get('/home', function (req, res) {
+	console.log('/GET /home')
 	const options = {
 		root: path.join(__dirname)
 	};
@@ -58,6 +67,7 @@ app.get('/home', function (req, res) {
 	});
 });
 app.get('/login', function (req, res) {
+	console.log('/GET /login')
 	const options = {
 		root: path.join(__dirname)
 	};
@@ -71,6 +81,7 @@ app.get('/login', function (req, res) {
 	});
 });
 app.get('/signin', function (req, res) {
+	console.log('/GET /signin')
 	const options = {
 		root: path.join(__dirname)
 	};
@@ -84,9 +95,23 @@ app.get('/signin', function (req, res) {
 	});
 });
 
+app.post('/signin',async function (req,res){
+	console.log('/POST /signin')
+	const data = {
+		email: req.body.email,
+		password: req.body.password
+	};
+	console.log(data);
+	collections.create({
+		email:req.body.email,
+		password: req.body.password
+	}).then((ans) => {
+		console.log("Document inserted")
+	})
 
 
-
+	
+})
 
 app.listen(PORT, function (err) {
 	if (err) console.log(err);
